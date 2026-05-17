@@ -183,17 +183,18 @@ async function completeSale() {
     });
     const data = await res.json();
     if (data.success) {
-        // حفظ بيانات الفاتورة للواتساب
         const customer = customers[customerId];
+        const decode = s => { const t = document.createElement('textarea'); t.innerHTML = s; return t.value; };
+        const paymentEl = document.getElementById('paymentMethod');
         currentSaleData = {
             invoiceNumber: data.invoiceNumber,
             total: data.total,
             id: data.id,
-            customerName: customer ? customer.name : 'عميل عام',
+            customerName: customer ? decode(customer.name) : 'عميل عام',
             customerPhone: customer ? customer.phone : '',
-            items: [...cart],
+            items: cart.map(i => ({ ...i, name: decode(i.name) })),
             discount: parseFloat(document.getElementById('discount').value) || 0,
-            paymentMethod: document.getElementById('paymentMethod').value
+            paymentMethod: paymentEl.options[paymentEl.selectedIndex].text
         };
 
         document.getElementById('invoiceInfo').innerHTML =
@@ -208,21 +209,26 @@ async function completeSale() {
     }
 }
 
+function decodeHTML(str) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = str;
+    return txt.value;
+}
+
 function sendWhatsApp() {
     if (!currentSaleData.customerPhone) return;
     const phone = currentSaleData.customerPhone.replace(/[^0-9]/g, '');
-    // تحويل الرقم المصري لصيغة دولية
     const intlPhone = phone.startsWith('0') ? '2' + phone : phone.startsWith('2') ? phone : '2' + phone;
 
     let msg = `🛒 *سوبر ماركت - فاتورة مشترياتك*\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `📋 رقم الفاتورة: *${currentSaleData.invoiceNumber}*\n`;
-    msg += `👤 العميل: ${currentSaleData.customerName}\n`;
-    msg += `💳 طريقة الدفع: ${currentSaleData.paymentMethod}\n`;
+    msg += `👤 العميل: ${decodeHTML(currentSaleData.customerName)}\n`;
+    msg += `💳 طريقة الدفع: ${decodeHTML(currentSaleData.paymentMethod)}\n`;
     msg += `━━━━━━━━━━━━━━━━\n`;
     msg += `*المشتريات:*\n`;
     currentSaleData.items.forEach(item => {
-        msg += `• ${item.name} × ${item.qty} = ${item.total.toFixed(2)} ج.م\n`;
+        msg += `• ${decodeHTML(item.name)} × ${item.qty} = ${item.total.toFixed(2)} ج.م\n`;
     });
     msg += `━━━━━━━━━━━━━━━━\n`;
     if (currentSaleData.discount > 0) {
