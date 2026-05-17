@@ -166,24 +166,34 @@
         if (!phone) return;
         const intlPhone = phone.startsWith('0') ? '2' + phone : phone.startsWith('2') ? phone : '2' + phone;
 
+        const data = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            invoiceNumber = Model.InvoiceNumber,
+            customerName  = Model.Customer?.Name ?? "عميل عام",
+            date          = Model.SaleDate.ToString("yyyy-MM-dd HH:mm"),
+            paymentMethod = Model.PaymentMethod,
+            discount      = Model.Discount,
+            total         = Model.Total,
+            items         = Model.Items.Select(i => new {
+                name     = i.ProductName,
+                quantity = i.Quantity,
+                total    = i.Total
+            })
+        }));
+
         let msg = `🛒 *سوبر ماركت - فاتورة مشترياتك*\n`;
         msg += `━━━━━━━━━━━━━━━━\n`;
-        msg += `📋 رقم الفاتورة: *@Model.InvoiceNumber*\n`;
-        msg += `👤 العميل: @(Model.Customer?.Name ?? "عميل عام")\n`;
-        msg += `📅 التاريخ: @Model.SaleDate.ToString("yyyy-MM-dd HH:mm")\n`;
-        msg += `💳 طريقة الدفع: @Model.PaymentMethod\n`;
+        msg += `📋 رقم الفاتورة: *${data.invoiceNumber}*\n`;
+        msg += `👤 العميل: ${data.customerName}\n`;
+        msg += `📅 التاريخ: ${data.date}\n`;
+        msg += `💳 طريقة الدفع: ${data.paymentMethod}\n`;
         msg += `━━━━━━━━━━━━━━━━\n`;
         msg += `*المشتريات:*\n`;
-        @foreach (var item in Model.Items)
-        {
-            @:msg += `• @item.ProductName × @item.Quantity = @item.Total.ToString("N2") ج.م\n`;
-        }
+        data.items.forEach(i => {
+            msg += `• ${i.name} × ${i.quantity} = ${i.total.toFixed(2)} ج.م\n`;
+        });
         msg += `━━━━━━━━━━━━━━━━\n`;
-        @if (Model.Discount > 0)
-        {
-            @:msg += `🎁 خصم: @Model.Discount.ToString("N2") ج.م\n`;
-        }
-        msg += `💰 *الإجمالي: @Model.Total.ToString("N2") ج.م*\n`;
+        if (data.discount > 0) msg += `🎁 خصم: ${data.discount.toFixed(2)} ج.م\n`;
+        msg += `💰 *الإجمالي: ${data.total.toFixed(2)} ج.م*\n`;
         msg += `━━━━━━━━━━━━━━━━\n`;
         msg += `🙏 شكراً لتسوقكم معنا!`;
 
