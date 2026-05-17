@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "المنتجات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">✅ @TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+}
+
+<div class="card">
+    <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+        <form method="get" class="d-flex gap-2 flex-wrap">
+            <input name="search" value="@ViewBag.Search" class="form-control form-control-sm" placeholder="بحث..." style="width:180px">
+            <select name="category" class="form-select form-select-sm" style="width:150px">
+                <option value="">كل التصنيفات</option>
+                @foreach (var c in (List<string>)ViewBag.Categories)
+                { <option value="@c" selected="@(ViewBag.CurrentCat == c ? "selected" : null)">@c</option> }
+            </select>
+            <button type="submit" class="btn btn-sm btn-outline-primary">بحث</button>
+        </form>
+        <a href="/Products/Create" class="btn btn-success btn-sm">+ منتج جديد</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light">
+                <tr><th>المنتج</th><th>الباركود</th><th>التصنيف</th><th>سعر البيع</th><th>المخزون</th><th>الحالة</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var p in Model)
+                {
+                    <tr>
+                        <td><strong>@p.Name</strong></td>
+                        <td class="text-muted">@p.Barcode</td>
+                        <td><span class="badge bg-secondary">@p.Category</span></td>
+                        <td class="text-success fw-bold">@p.Price.ToString("N2")</td>
+                        <td>
+                            @if (p.Stock <= p.MinStock)
+                            { <span class="badge bg-danger">@p.Stock @p.Unit</span> }
+                            else
+                            { <span class="badge bg-success">@p.Stock @p.Unit</span> }
+                        </td>
+                        <td>@(p.IsActive ? "✅" : "❌")</td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="/Products/Edit/@p.Id" class="btn btn-sm btn-outline-primary">تعديل</a>
+                                <form method="post" action="/Products/Delete/@p.Id" style="display:inline"
+                                      onsubmit="return confirm('حذف المنتج؟')">
+                                    <button class="btn btn-sm btn-outline-danger">حذف</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

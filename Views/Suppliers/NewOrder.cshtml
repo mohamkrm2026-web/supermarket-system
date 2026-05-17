@@ -1,0 +1,155 @@
+@{
+    ViewData["Title"] = "أمر شراء جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var supplier = (SuperMarket.Models.Supplier)ViewBag.Supplier;
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Suppliers/Details/@supplier.Id" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">أمر شراء جديد — @supplier.Name</h5>
+</div>
+
+<div class="row g-3">
+    <!-- المنتجات -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <input type="text" id="searchProduct" class="form-control form-control-sm" placeholder="بحث بالاسم...">
+            </div>
+            <div class="card-body p-2" style="max-height:450px;overflow-y:auto">
+                <table class="table table-hover table-sm mb-0">
+                    <thead class="table-light">
+                        <tr><th>المنتج</th><th>سعر التكلفة</th><th>المخزون</th><th></th></tr>
+                    </thead>
+                    <tbody id="productsTable">
+                        @foreach (var p in (dynamic)ViewBag.Products)
+                        {
+                            <tr class="product-row" data-name="@p.Name.ToLower()">
+                                <td>@p.Name</td>
+                                <td>@p.CostPrice.ToString("N2")</td>
+                                <td>@p.Stock @p.Unit</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-success"
+                                            onclick="addItem(@p.Id, '@p.Name', @p.CostPrice)">
+                                        إضافة
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- الطلب -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-primary text-white"><strong>📦 بنود الطلب</strong></div>
+            <div class="card-body p-2">
+                <div id="orderItems" style="min-height:200px;max-height:300px;overflow-y:auto">
+                    <div class="text-center text-muted py-4" id="emptyMsg">لم يتم إضافة منتجات</div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-3">
+                    <span class="fw-bold">الإجمالي:</span>
+                    <span id="orderTotal" class="fw-bold text-primary fs-5">0.00 ج.م</span>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small">ملاحظات</label>
+                    <textarea id="notes" class="form-control form-control-sm" rows="2"></textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger flex-fill" onclick="clearOrder()">مسح</button>
+                    <button class="btn btn-success flex-fill" onclick="saveOrder()">حفظ الطلب ✓</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let orderItems = [];
+
+function addItem(id, name, cost) {
+    const existing = orderItems.find(i => i.productId === id);
+    if (existing) {
+        existing.quantity++;
+        existing.total = existing.quantity * existing.unitCost;
+    } else {
+        orderItems.push({ productId: id, name, quantity: 1, unitCost: cost, total: cost });
+    }
+    renderOrder();
+}
+
+function renderOrder() {
+    const container = document.getElementById('orderItems');
+    if (orderItems.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4">لم يتم إضافة منتجات</div>';
+        document.getElementById('orderTotal').textContent = '0.00 ج.م';
+        return;
+    }
+    container.innerHTML = orderItems.map((item, i) => `
+        <div class="border rounded p-2 mb-1 small">
+            <div class="fw-bold mb-1">${item.name}</div>
+            <div class="d-flex align-items-center gap-2">
+                <span>الكمية:</span>
+                <button class="btn btn-sm btn-outline-secondary px-1 py-0" onclick="changeQty(${i},-1)">-</button>
+                <span>${item.quantity}</span>
+                <button class="btn btn-sm btn-outline-secondary px-1 py-0" onclick="changeQty(${i},1)">+</button>
+                <span class="ms-auto">|</span>
+                <span>سعر الوحدة:</span>
+                <input type="number" class="form-control form-control-sm" style="width:80px"
+                       value="${item.unitCost}" step="0.01" min="0"
+                       onchange="updateCost(${i}, this.value)">
+                <span class="text-primary fw-bold">${item.total.toFixed(2)}</span>
+                <button class="btn btn-sm btn-outline-danger px-1 py-0" onclick="removeItem(${i})">×</button>
+            </div>
+        </div>`).join('');
+    const total = orderItems.reduce((acc, i) => acc + i.total, 0);
+    document.getElementById('orderTotal').textContent = total.toFixed(2) + ' ج.م';
+}
+
+function changeQty(i, d) {
+    orderItems[i].quantity = Math.max(1, orderItems[i].quantity + d);
+    orderItems[i].total = orderItems[i].quantity * orderItems[i].unitCost;
+    renderOrder();
+}
+
+function updateCost(i, val) {
+    orderItems[i].unitCost = parseFloat(val) || 0;
+    orderItems[i].total = orderItems[i].quantity * orderItems[i].unitCost;
+    renderOrder();
+}
+
+function removeItem(i) { orderItems.splice(i, 1); renderOrder(); }
+function clearOrder() { orderItems = []; renderOrder(); }
+
+async function saveOrder() {
+    if (orderItems.length === 0) { alert('أضف منتجاً واحداً على الأقل'); return; }
+    const res = await fetch('/Suppliers/SaveOrder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            supplierId: '@supplier.Id',
+            notes: document.getElementById('notes').value,
+            items: JSON.stringify(orderItems.map(i => ({
+                productId: i.productId,
+                quantity: i.quantity,
+                unitCost: i.unitCost
+            })))
+        })
+    });
+    if (res.redirected) { window.location.href = res.url; }
+    else { window.location.href = '/Suppliers/Details/@supplier.Id'; }
+}
+
+document.getElementById('searchProduct').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.product-row').forEach(row => {
+        row.style.display = row.dataset.name.includes(q) ? '' : 'none';
+    });
+});
+</script>
+}

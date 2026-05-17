@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "إضافة مورد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Suppliers" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">إضافة مورد جديد</h5>
+</div>
+
+<div class="card" style="max-width:600px">
+    <div class="card-body">
+        <form method="post" action="/Suppliers/Create">
+            <div class="mb-3">
+                <label class="form-label">اسم المورد <span class="text-danger">*</span></label>
+                <input type="text" name="Name" class="form-control" required>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">الهاتف</label>
+                    <input type="text" name="Phone" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input type="email" name="Email" class="form-control">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">العنوان</label>
+                <input type="text" name="Address" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">الرقم الضريبي</label>
+                <input type="text" name="TaxNumber" class="form-control">
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="isActive" checked>
+                <label class="form-check-label" for="isActive">نشط</label>
+            </div>
+            <button type="submit" class="btn btn-success px-4">حفظ</button>
+        </form>
+    </div>
+</div>

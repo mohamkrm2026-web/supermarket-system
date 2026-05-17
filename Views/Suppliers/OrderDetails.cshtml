@@ -1,0 +1,86 @@
+@model SuperMarket.Models.PurchaseOrder
+@{
+    ViewData["Title"] = "تفاصيل أمر الشراء";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Suppliers/Details/@Model.SupplierId" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">@Model.OrderNumber</h5>
+    @if (Model.Status == "مستلم")
+    { <span class="badge bg-success fs-6">مستلم</span> }
+    else if (Model.Status == "معلق")
+    { <span class="badge bg-warning text-dark fs-6">معلق</span> }
+    else
+    { <span class="badge bg-secondary fs-6">@Model.Status</span> }
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+}
+
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted">المورد</td><td><strong>@Model.Supplier?.Name</strong></td></tr>
+                    <tr><td class="text-muted">التاريخ</td><td>@Model.OrderDate.ToString("yyyy-MM-dd HH:mm")</td></tr>
+                    <tr><td class="text-muted">ملاحظات</td><td>@(Model.Notes ?? "—")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 d-flex align-items-center">
+        @if (Model.Status == "معلق")
+        {
+            <div class="d-flex gap-2 w-100">
+                <form method="post" action="/Suppliers/ReceiveOrder/@Model.Id" class="flex-fill">
+                    <button class="btn btn-success w-100"
+                            onclick="return confirm('تأكيد استلام الطلب؟ سيتم تحديث المخزون تلقائياً')">
+                        ✅ تأكيد الاستلام وتحديث المخزون
+                    </button>
+                </form>
+                <form method="post" action="/Suppliers/CancelOrder/@Model.Id">
+                    <button class="btn btn-outline-danger"
+                            onclick="return confirm('إلغاء هذا الطلب؟')">إلغاء</button>
+                </form>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>بنود الطلب</strong>
+        <span class="fw-bold text-primary fs-5">الإجمالي: @Model.Total.ToString("N2") ج.م</span>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr><th>#</th><th>المنتج</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr>
+            </thead>
+            <tbody>
+                @{ int n = 1; }
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td>@n</td>
+                        <td>@item.ProductName</td>
+                        <td>@item.Quantity</td>
+                        <td>@item.UnitCost.ToString("N2") ج.م</td>
+                        <td class="fw-bold text-primary">@item.Total.ToString("N2") ج.م</td>
+                    </tr>
+                    n++;
+                }
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <td colspan="4" class="text-end fw-bold">الإجمالي:</td>
+                    <td class="fw-bold text-primary fs-5">@Model.Total.ToString("N2") ج.م</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

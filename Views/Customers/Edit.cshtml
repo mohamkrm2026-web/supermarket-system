@@ -1,0 +1,34 @@
+﻿@{
+    ViewData["Title"] = "تعديل عميل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var c = ViewBag.Customer;
+}
+<div class="card" style="max-width:500px;margin:auto">
+    <div class="card-header"><h5 class="mb-0">تعديل بيانات العميل</h5></div>
+    <div class="card-body">
+        <form method="post" action="/Customers/EditSave">
+            <input type="hidden" name="Id" value="@c.Id">
+            <input type="hidden" name="TotalPurchases" value="@c.TotalPurchases">
+            <input type="hidden" name="Points" value="@c.Points">
+            <input type="hidden" name="CreatedAt" value="@c.CreatedAt">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">الاسم</label>
+                <input type="text" name="Name" value="@c.Name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">رقم الهاتف</label>
+                <input type="text" name="Phone" value="@c.Phone" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">البريد الإلكتروني</label>
+                <input type="email" name="Email" value="@c.Email" class="form-control">
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Customers" class="btn btn-outline-secondary">إلغاء</a>
+                <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

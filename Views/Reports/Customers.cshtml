@@ -1,0 +1,136 @@
+@{
+    ViewData["Title"] = "تقارير العملاء";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Reports" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+        <h5 class="mb-0">👥 تقارير العملاء</h5>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
+<div class="print-only text-center mb-4">
+    <h3>🛒 سوبر ماركت — تقرير العملاء</h3>
+    <p>تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #0dcaf0">
+            <div class="stat-label">إجمالي العملاء</div>
+            <div class="stat-value text-info">@ViewBag.TotalCustomers</div>
+            <div class="stat-sub">عميل</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #1a6e3c">
+            <div class="stat-label">عملاء جدد هذا الشهر</div>
+            <div class="stat-value text-success">@ViewBag.NewCustomersCount</div>
+            <div class="stat-sub">عميل</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- أكثر العملاء شراءً -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white"><strong>🏆 أكثر العملاء شراءً</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>#</th><th>العميل</th><th>الهاتف</th><th>إجمالي المشتريات</th></tr></thead>
+                    <tbody>
+                        @{ int r = 1; }
+                        @foreach (var c in (dynamic)ViewBag.TopCustomers)
+                        {
+                            if (c.Name == "عميل عام") { continue; }
+                            <tr>
+                                <td><span class="badge bg-primary">@r</span></td>
+                                <td class="fw-bold">@c.Name</td>
+                                <td>@c.Phone</td>
+                                <td class="text-success fw-bold">@c.TotalPurchases.ToString("N0") ج.م</td>
+                            </tr>
+                            r++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- نقاط الولاء -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning"><strong>⭐ نقاط الولاء</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>#</th><th>العميل</th><th>النقاط</th></tr></thead>
+                    <tbody>
+                        @{ int r2 = 1; }
+                        @foreach (var c in (dynamic)ViewBag.TopPoints)
+                        {
+                            <tr>
+                                <td><span class="badge bg-warning text-dark">@r2</span></td>
+                                <td class="fw-bold">@c.Name</td>
+                                <td><span class="badge bg-success fs-6">@c.Points ⭐</span></td>
+                            </tr>
+                            r2++;
+                        }
+                        @if (((System.Collections.IList)ViewBag.TopPoints).Count == 0)
+                        { <tr><td colspan="3" class="text-center text-muted py-3">لا توجد نقاط</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- عملاء جدد هذا الشهر -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white"><strong>🆕 العملاء الجدد هذا الشهر</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>العميل</th><th>الهاتف</th><th>البريد</th><th>تاريخ التسجيل</th></tr></thead>
+            <tbody>
+                @foreach (var c in (dynamic)ViewBag.NewCustomers)
+                {
+                    <tr>
+                        <td class="fw-bold">@c.Name</td><td>@c.Phone</td>
+                        <td>@c.Email</td>
+                        <td>@c.CreatedAt.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+                @if (((System.Collections.IList)ViewBag.NewCustomers).Count == 0)
+                { <tr><td colspan="4" class="text-center text-muted py-3">لا يوجد عملاء جدد هذا الشهر</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- عدد الزيارات -->
+<div class="card">
+    <div class="card-header"><strong>📍 الزيارات لكل عميل</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>العميل</th><th>عدد الزيارات</th><th>آخر زيارة</th></tr></thead>
+            <tbody>
+                @foreach (var cv in (dynamic)ViewBag.CustomerVisits)
+                {
+                    <tr>
+                        <td class="fw-bold">@cv.Customer.Name</td>
+                        <td><span class="badge bg-info text-dark">@cv.Visits</span></td>
+                        <td>@cv.LastVisit.ToString("yyyy-MM-dd")</td>
+                    </tr>
+                }
+                @if (((System.Collections.IList)ViewBag.CustomerVisits).Count == 0)
+                { <tr><td colspan="3" class="text-center text-muted py-3">لا توجد بيانات</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    @@media print { .no-print{display:none!important;} .print-only{display:block!important;} nav{display:none!important;} .container-fluid{padding:0!important;} }
+    .print-only{display:none;}
+</style>
+}

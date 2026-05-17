@@ -1,0 +1,72 @@
+﻿@{
+    ViewData["Title"] = "منتج جديد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card" style="max-width:600px;margin:auto">
+    <div class="card-header"><h5 class="mb-0">إضافة منتج جديد</h5></div>
+    <div class="card-body">
+        <form method="post" action="/Products/Create">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">اسم المنتج</label>
+                <input type="text" name="Name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">الباركود</label>
+                <input type="text" name="Barcode" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">التصنيف</label>
+                <select name="Category" class="form-select">
+                    <option value="بقالة">بقالة</option>
+                    <option value="مشروبات">مشروبات</option>
+                    <option value="عناية">عناية</option>
+                    <option value="خضروات">خضروات وفواكه</option>
+                    <option value="ألبان">ألبان ومشتقات</option>
+                    <option value="أخرى">أخرى</option>
+                </select>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col">
+                    <label class="form-label fw-semibold">سعر البيع</label>
+                    <input type="number" name="Price" class="form-control" step="0.01" min="0" required>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">سعر التكلفة</label>
+                    <input type="number" name="CostPrice" class="form-control" step="0.01" min="0">
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col">
+                    <label class="form-label fw-semibold">الكمية في المخزون</label>
+                    <input type="number" name="Stock" class="form-control" min="0" value="0" required>
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">الحد الأدنى للمخزون</label>
+                    <input type="number" name="MinStock" class="form-control" min="0" value="5">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">الوحدة</label>
+                <select name="Unit" class="form-select">
+                    <option value="قطعة">قطعة</option>
+                    <option value="كيس">كيس</option>
+                    <option value="زجاجة">زجاجة</option>
+                    <option value="علبة">علبة</option>
+                    <option value="كجم">كجم</option>
+                    <option value="لتر">لتر</option>
+                </select>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="isActive" checked>
+                <label class="form-check-label" for="isActive">منتج نشط</label>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Products" class="btn btn-outline-secondary">إلغاء</a>
+                <button type="submit" class="btn btn-success">حفظ المنتج</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

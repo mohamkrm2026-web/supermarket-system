@@ -1,0 +1,188 @@
+@{
+    ViewData["Title"] = "تقارير المخزون";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Reports" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+        <h5 class="mb-0">📦 تقارير المخزون</h5>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
+<div class="print-only text-center mb-4">
+    <h3>🛒 سوبر ماركت — تقرير المخزون</h3>
+    <p>تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #1a6e3c">
+            <div class="stat-label">قيمة المخزون (التكلفة)</div>
+            <div class="stat-value text-success">@ViewBag.TotalStockValue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #0d6efd">
+            <div class="stat-label">قيمة المخزون (البيع)</div>
+            <div class="stat-value text-primary">@ViewBag.TotalRetailValue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #dc3545">
+            <div class="stat-label">منتجات منخفضة</div>
+            <div class="stat-value text-danger">@((((System.Collections.IList)ViewBag.LowStock).Count))</div>
+            <div class="stat-sub">منتج</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #6c757d">
+            <div class="stat-label">منتجات راكدة</div>
+            <div class="stat-value text-secondary">@((((System.Collections.IList)ViewBag.SlowMoving).Count))</div>
+            <div class="stat-sub">منتج (30 يوم)</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- أكثر مبيعاً -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-success text-white"><strong>🏆 أكثر المنتجات مبيعاً</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>#</th><th>المنتج</th><th>الكمية</th><th>الإيراد</th></tr></thead>
+                    <tbody>
+                        @{ int r = 1; }
+                        @foreach (var p in (dynamic)ViewBag.TopSold)
+                        {
+                            <tr>
+                                <td><span class="badge bg-success">@r</span></td>
+                                <td>@p.ProductName</td><td>@p.Qty</td>
+                                <td class="text-success fw-bold">@p.Revenue.ToString("N0")</td>
+                            </tr>
+                            r++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- أقل مبيعاً -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-warning"><strong>📉 أقل المنتجات مبيعاً</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>#</th><th>المنتج</th><th>الكمية</th></tr></thead>
+                    <tbody>
+                        @{ int r2 = 1; }
+                        @foreach (var p in (dynamic)ViewBag.LeastSold)
+                        {
+                            <tr>
+                                <td><span class="badge bg-warning text-dark">@r2</span></td>
+                                <td>@p.ProductName</td>
+                                <td class="text-warning fw-bold">@p.Qty</td>
+                            </tr>
+                            r2++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- منتجات قاربت على الانتهاء -->
+<div class="card mb-4">
+    <div class="card-header bg-danger text-white"><strong>⚠️ منتجات قاربت على الانتهاء</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>المنتج</th><th>الفئة</th><th>المخزون الحالي</th><th>الحد الأدنى</th><th>الوحدة</th></tr></thead>
+            <tbody>
+                @foreach (var p in (dynamic)ViewBag.LowStock)
+                {
+                    <tr class="table-danger">
+                        <td class="fw-bold">@p.Name</td><td>@p.Category</td>
+                        <td><span class="badge bg-danger fs-6">@p.Stock</span></td>
+                        <td>@p.MinStock</td><td>@p.Unit</td>
+                    </tr>
+                }
+                @if (((System.Collections.IList)ViewBag.LowStock).Count == 0)
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-3">لا توجد منتجات منخفضة ✅</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- منتجات نفذت -->
+@if (((System.Collections.IList)ViewBag.OutOfStock).Count > 0)
+{
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white"><strong>❌ منتجات نفذت من المخزون</strong></div>
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0 small">
+                <thead class="table-light"><tr><th>المنتج</th><th>الفئة</th><th>الحد الأدنى</th></tr></thead>
+                <tbody>
+                    @foreach (var p in (dynamic)ViewBag.OutOfStock)
+                    {
+                        <tr><td class="fw-bold">@p.Name</td><td>@p.Category</td><td>@p.MinStock</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<!-- منتجات راكدة -->
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white"><strong>😴 منتجات راكدة (لم تباع في آخر 30 يوم)</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>المنتج</th><th>الفئة</th><th>المخزون</th><th>سعر البيع</th></tr></thead>
+            <tbody>
+                @foreach (var p in (dynamic)ViewBag.SlowMoving)
+                {
+                    <tr><td class="fw-bold">@p.Name</td><td>@p.Category</td>
+                        <td>@p.Stock @p.Unit</td><td>@p.Price.ToString("N2") ج.م</td></tr>
+                }
+                @if (((System.Collections.IList)ViewBag.SlowMoving).Count == 0)
+                {
+                    <tr><td colspan="4" class="text-center text-muted py-3">لا توجد منتجات راكدة ✅</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- تقرير المخزون الكامل -->
+<div class="card">
+    <div class="card-header"><strong>📋 تقرير المخزون الكامل</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>المنتج</th><th>الفئة</th><th>المخزون</th><th>سعر التكلفة</th><th>سعر البيع</th><th>قيمة المخزون</th></tr></thead>
+            <tbody>
+                @foreach (var p in (dynamic)ViewBag.Products)
+                {
+                    <tr class="@(p.Stock <= p.MinStock ? "table-warning" : "")">
+                        <td class="fw-bold">@p.Name</td><td>@p.Category</td>
+                        <td>@p.Stock @p.Unit</td>
+                        <td>@p.CostPrice.ToString("N2")</td><td>@p.Price.ToString("N2")</td>
+                        <td class="fw-bold">@((p.Stock * p.CostPrice).ToString("N2")) ج.م</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    @@media print { .no-print { display:none!important; } .print-only { display:block!important; } nav { display:none!important; } .container-fluid { padding:0!important; } }
+    .print-only { display:none; }
+</style>
+}

@@ -1,0 +1,121 @@
+@{
+    ViewData["Title"] = "تقارير المشتريات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Reports" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+        <h5 class="mb-0">🏷️ تقارير المشتريات</h5>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="window.print()">🖨️ طباعة PDF</button>
+</div>
+<div class="print-only text-center mb-4">
+    <h3>🛒 سوبر ماركت — تقرير المشتريات</h3>
+    <p>تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #6f42c1">
+            <div class="stat-label">إجمالي الطلبات</div>
+            <div class="stat-value">@ViewBag.TotalOrders</div>
+            <div class="stat-sub">أمر شراء</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #1a6e3c">
+            <div class="stat-label">إجمالي المستلم</div>
+            <div class="stat-value text-success">@ViewBag.TotalReceived.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #fd7e14">
+            <div class="stat-label">طلبات معلقة</div>
+            <div class="stat-value text-warning">@ViewBag.PendingOrders</div>
+            <div class="stat-sub">أمر</div>
+        </div>
+    </div>
+</div>
+
+<!-- أكثر الموردين تعاملاً -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white"><strong>🏆 أكثر الموردين تعاملاً</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>#</th><th>المورد</th><th>عدد الطلبات</th><th>إجمالي المشتريات</th></tr></thead>
+            <tbody>
+                @{ int r = 1; }
+                @foreach (var s in (dynamic)ViewBag.TopSuppliers)
+                {
+                    <tr>
+                        <td><span class="badge bg-primary">@r</span></td>
+                        <td class="fw-bold">@s.Supplier.Name</td>
+                        <td>@s.OrderCount</td>
+                        <td class="text-success fw-bold">@s.TotalValue.ToString("N0") ج.م</td>
+                    </tr>
+                    r++;
+                }
+                @if (((System.Collections.IList)ViewBag.TopSuppliers).Count == 0)
+                { <tr><td colspan="4" class="text-center text-muted py-3">لا توجد بيانات</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- مشتريات شهرية -->
+<div class="card mb-4">
+    <div class="card-header"><strong>📅 المشتريات الشهرية</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>الشهر</th><th>عدد الطلبات</th><th>الإجمالي</th></tr></thead>
+            <tbody>
+                @foreach (var m in (dynamic)ViewBag.MonthlyPurchases)
+                {
+                    <tr>
+                        <td>@m.Year / @m.Month</td>
+                        <td>@m.Count</td>
+                        <td class="fw-bold text-success">@m.Total.ToString("N0") ج.م</td>
+                    </tr>
+                }
+                @if (((System.Collections.IList)ViewBag.MonthlyPurchases).Count == 0)
+                { <tr><td colspan="3" class="text-center text-muted py-3">لا توجد بيانات</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- فواتير الشراء -->
+<div class="card">
+    <div class="card-header"><strong>📋 جميع أوامر الشراء</strong></div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light"><tr><th>رقم الأمر</th><th>المورد</th><th>التاريخ</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
+            <tbody>
+                @foreach (var o in (dynamic)ViewBag.Orders)
+                {
+                    <tr>
+                        <td><a href="/Suppliers/OrderDetails/@o.Id" class="no-print">@o.OrderNumber</a><span class="print-only">@o.OrderNumber</span></td>
+                        <td>@o.Supplier?.Name</td>
+                        <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>
+                        <td class="fw-bold">@o.Total.ToString("N0") ج.م</td>
+                        <td>
+                            @if (o.Status == "مستلم") { <span class="badge bg-success">@o.Status</span> }
+                            else if (o.Status == "معلق") { <span class="badge bg-warning text-dark">@o.Status</span> }
+                            else { <span class="badge bg-secondary">@o.Status</span> }
+                        </td>
+                    </tr>
+                }
+                @if (((System.Collections.IList)ViewBag.Orders).Count == 0)
+                { <tr><td colspan="5" class="text-center text-muted py-3">لا توجد أوامر شراء</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    @@media print { .no-print{display:none!important;} .print-only{display:block!important;} nav{display:none!important;} .container-fluid{padding:0!important;} }
+    .print-only{display:none;}
+</style>
+}

@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "تفاصيل العميل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var c = ViewBag.Customer;
+}
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div style="font-size:50px">👤</div>
+                <h5>@c.Name</h5>
+                <p class="text-muted mb-1">@c.Phone</p>
+                <p class="text-muted small">@c.Email</p>
+                <hr>
+                <div class="d-flex justify-content-around">
+                    <div>
+                        <div class="fw-bold text-success">@c.TotalPurchases.ToString("N0")</div>
+                        <div class="text-muted small">إجمالي المشتريات</div>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-warning">@c.Points</div>
+                        <div class="text-muted small">النقاط</div>
+                    </div>
+                </div>
+                <hr>
+                <a href="/Customers/Edit/@c.Id" class="btn btn-outline-primary btn-sm w-100">تعديل البيانات</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><strong>سجل المشتريات</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light">
+                        <tr><th>رقم الفاتورة</th><th>التاريخ</th><th>الإجمالي</th><th>الدفع</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in (dynamic)ViewBag.Sales)
+                        {
+                            <tr>
+                                <td><a href="/Sales/Details/@s.Id">@s.InvoiceNumber</a></td>
+                                <td>@s.SaleDate.ToString("yyyy-MM-dd")</td>
+                                <td class="text-success fw-bold">@s.Total.ToString("N2")</td>
+                                <td>@s.PaymentMethod</td>
+                            </tr>
+                        }
+                        @if (((System.Collections.IList)ViewBag.Sales).Count == 0)
+                        {
+                            <tr><td colspan="4" class="text-center py-3 text-muted">لا توجد مشتريات</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+

@@ -1,0 +1,101 @@
+﻿@{
+    ViewData["Title"] = "لوحة التحكم";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #1a6e3c">
+            <div class="stat-label">مبيعات اليوم</div>
+            <div class="stat-value">@ViewBag.TodaySales</div>
+            <div class="stat-sub">فاتورة</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #0d6efd">
+            <div class="stat-label">إيراد اليوم</div>
+            <div class="stat-value">@ViewBag.TodayRevenue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #6f42c1">
+            <div class="stat-label">إيراد الشهر</div>
+            <div class="stat-value">@ViewBag.MonthRevenue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #dc3545">
+            <div class="stat-label">مخزون منخفض</div>
+            <div class="stat-value text-danger">@ViewBag.LowStock</div>
+            <div class="stat-sub">منتج</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>آخر المبيعات</strong>
+                <a href="/Sales" class="btn btn-sm btn-outline-primary">عرض الكل</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light">
+                        <tr><th>الفاتورة</th><th>العميل</th><th>الإجمالي</th><th>التاريخ</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in (dynamic)ViewBag.RecentSales)
+                        {
+                            <tr>
+                                <td><a href="/Sales/Details/@s.Id">@s.InvoiceNumber</a></td>
+                                <td>@(s.Customer?.Name ?? "عميل عام")</td>
+                                <td class="text-success fw-bold">@s.Total.ToString("N0")</td>
+                                <td>@s.SaleDate.ToString("MM-dd HH:mm")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <strong>⚠️ مخزون منخفض</strong>
+                <a href="/Products" class="btn btn-sm btn-outline-danger">إدارة المخزون</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light">
+                        <tr><th>المنتج</th><th>المتوفر</th><th>الحد الأدنى</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in (dynamic)ViewBag.LowStockProducts)
+                        {
+                            <tr>
+                                <td>@p.Name</td>
+                                <td><span class="badge bg-danger">@p.Stock @p.Unit</span></td>
+                                <td class="text-muted">@p.MinStock</td>
+                            </tr>
+                        }
+                        @if (((System.Collections.IList)ViewBag.LowStockProducts).Count == 0)
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-3">المخزون بخير ✅</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center mt-4">
+    <a href="/Sales/Cashier" class="btn btn-lg btn-success px-5">
+        🖥️ فتح الكاشير
+    </a>
+</div>
+
+

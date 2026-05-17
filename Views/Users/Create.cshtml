@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "إضافة مستخدم";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Users" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">إضافة مستخدم جديد</h5>
+</div>
+
+<div class="card" style="max-width:520px">
+    <div class="card-body">
+        <form method="post" action="/Users/Create">
+            <div class="mb-3">
+                <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                <input type="text" name="fullName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">اسم المستخدم <span class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">كلمة المرور <span class="text-danger">*</span></label>
+                <input type="password" name="password" class="form-control" required minlength="6">
+            </div>
+            <div class="mb-4">
+                <label class="form-label">الدور <span class="text-danger">*</span></label>
+                <select name="role" class="form-select" required>
+                    <option value="Admin">👑 Admin — كل الصلاحيات</option>
+                    <option value="كاشير" selected>🖥️ كاشير — الكاشير والمبيعات والعملاء</option>
+                    <option value="مدير مخزن">📦 مدير مخزن — المنتجات والموردين</option>
+                    <option value="مشاهدة فقط">👁️ مشاهدة فقط — بدون تعديل</option>
+                </select>
+                <div class="mt-2 p-2 bg-light rounded small text-muted" id="roleDesc">
+                    يستطيع استخدام الكاشير وإدارة المبيعات والعملاء
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success px-4">حفظ</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const desc = {
+    'Admin': 'صلاحية كاملة على كل أجزاء النظام بما فيها إدارة المستخدمين',
+    'كاشير': 'يستطيع استخدام الكاشير وإدارة المبيعات والعملاء',
+    'مدير مخزن': 'يستطيع إدارة المنتجات والموردين وأوامر الشراء',
+    'مشاهدة فقط': 'يستطيع مشاهدة كل البيانات بدون أي تعديل أو حذف'
+};
+document.querySelector('select[name=role]').addEventListener('change', function() {
+    document.getElementById('roleDesc').textContent = desc[this.value] || '';
+});
+</script>
+}

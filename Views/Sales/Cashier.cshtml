@@ -1,0 +1,256 @@
+﻿@{
+    ViewData["Title"] = "الكاشير";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row g-3">
+    <!-- Products Panel -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex gap-2">
+                    <input type="text" id="searchProduct" class="form-control" placeholder="بحث بالاسم أو الباركود...">
+                </div>
+            </div>
+            <div class="card-body p-2">
+                <div class="row g-2" id="productsGrid">
+                    @foreach (var p in (dynamic)ViewBag.Products)
+                    {
+                        <div class="col-6 col-md-4 product-card-wrapper"
+                             data-name="@p.Name.ToLower()"
+                             data-barcode="@(p.Barcode ?? "")">
+                            <div class="product-card" onclick="addToCart(@p.Id, '@p.Name', @p.Price, @p.Stock)">
+                                <div class="product-name">@p.Name</div>
+                                <div class="product-price">@p.Price.ToString("N2") ج.م</div>
+                                <div class="product-stock @(p.Stock <= p.MinStock ? "text-danger" : "text-muted")">
+                                    المخزون: @p.Stock @p.Unit
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Panel -->
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <strong>🛒 سلة المشتريات</strong>
+            </div>
+            <div class="card-body p-2">
+                <div class="mb-2">
+                    <select id="customerId" class="form-select form-select-sm">
+                        @foreach (var c in (dynamic)ViewBag.Customers)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </div>
+                <div id="cartItems" style="min-height:200px;max-height:300px;overflow-y:auto">
+                    <div class="text-center text-muted py-4" id="emptyCart">السلة فارغة</div>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>المجموع:</span>
+                    <span id="subTotal" class="fw-bold">0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2 align-items-center">
+                    <span>خصم:</span>
+                    <input type="number" id="discount" class="form-control form-control-sm" style="width:100px" value="0" min="0" oninput="updateTotal()">
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="fw-bold">الإجمالي:</span>
+                    <span id="totalAmount" class="fw-bold text-success fs-5">0.00</span>
+                </div>
+                <div class="mb-2">
+                    <select id="paymentMethod" class="form-select form-select-sm">
+                        <option value="نقدي">نقدي</option>
+                        <option value="بطاقة">بطاقة بنكية</option>
+                        <option value="تحويل">تحويل بنكي</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-danger flex-fill" onclick="clearCart()">مسح</button>
+                    <button class="btn btn-success flex-fill" onclick="completeSale()">إتمام البيع ✓</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title">✅ تم البيع بنجاح</h6>
+            </div>
+            <div class="modal-body text-center">
+                <div id="invoiceInfo"></div>
+            </div>
+            <div class="modal-footer flex-column gap-2">
+                <a id="printInvoiceBtn" href="#" target="_blank" class="btn btn-outline-primary w-100">🖨️ طباعة الفاتورة</a>
+                <button id="whatsappBtn" class="btn btn-success w-100" style="background:#25D366;border-color:#25D366;display:none" onclick="sendWhatsApp()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                        <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/>
+                    </svg>
+                    إرسال واتساب
+                </button>
+                <button class="btn btn-secondary w-100" onclick="newSale()">فاتورة جديدة</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+let cart = [];
+let currentSaleData = {};
+
+// بيانات العملاء مع أرقام التليفون
+const customers = @Html.Raw(
+    System.Text.Json.JsonSerializer.Serialize(
+        ((IEnumerable<dynamic>)ViewBag.Customers).ToDictionary(
+            c => (int)c.Id,
+            c => new { name = (string)c.Name, phone = (string)(c.Phone ?? "") }
+        )
+    )
+);
+
+function addToCart(id, name, price, stock) {
+    const existing = cart.find(i => i.id === id);
+    if (existing) {
+        if (existing.qty >= stock) { alert('لا يوجد مخزون كافٍ'); return; }
+        existing.qty++;
+        existing.total = existing.qty * existing.price;
+    } else {
+        cart.push({ id, name, price, qty: 1, total: price, stock });
+    }
+    renderCart();
+}
+
+function renderCart() {
+    const container = document.getElementById('cartItems');
+    if (cart.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4">السلة فارغة</div>';
+        updateTotal(); return;
+    }
+    container.innerHTML = cart.map((item, i) => `
+        <div class="cart-item">
+            <div class="cart-name">${item.name}</div>
+            <div class="d-flex align-items-center gap-1">
+                <button class="btn btn-sm btn-outline-secondary px-1 py-0" onclick="changeQty(${i}, -1)">-</button>
+                <span class="px-2">${item.qty}</span>
+                <button class="btn btn-sm btn-outline-secondary px-1 py-0" onclick="changeQty(${i}, 1)">+</button>
+                <span class="ms-2 text-success">${item.total.toFixed(2)}</span>
+                <button class="btn btn-sm btn-outline-danger px-1 py-0 ms-1" onclick="removeItem(${i})">×</button>
+            </div>
+        </div>`).join('');
+    updateTotal();
+}
+
+function changeQty(i, d) {
+    cart[i].qty = Math.max(1, Math.min(cart[i].stock, cart[i].qty + d));
+    cart[i].total = cart[i].qty * cart[i].price;
+    renderCart();
+}
+
+function removeItem(i) { cart.splice(i, 1); renderCart(); }
+function clearCart() { cart = []; renderCart(); }
+
+function updateTotal() {
+    const sub = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+    const disc = parseFloat(document.getElementById('discount').value) || 0;
+    document.getElementById('subTotal').textContent = sub.toFixed(2);
+    document.getElementById('totalAmount').textContent = Math.max(0, sub - disc).toFixed(2);
+}
+
+async function completeSale() {
+    if (cart.length === 0) { alert('السلة فارغة!'); return; }
+    const items = JSON.stringify(cart.map(i => ({ productId: i.id, quantity: i.qty })));
+    const customerId = document.getElementById('customerId').value;
+    const res = await fetch('/Sales/CompleteSale', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+    customerId: customerId,
+    paymentMethod: document.getElementById('paymentMethod').value,
+    discount: document.getElementById('discount').value || '0',
+    items: JSON.stringify(cart.map(i => ({ productId: i.id, quantity: i.qty })))
+})
+    });
+    const data = await res.json();
+    if (data.success) {
+        // حفظ بيانات الفاتورة للواتساب
+        const customer = customers[customerId];
+        currentSaleData = {
+            invoiceNumber: data.invoiceNumber,
+            total: data.total,
+            id: data.id,
+            customerName: customer ? customer.name : 'عميل عام',
+            customerPhone: customer ? customer.phone : '',
+            items: [...cart],
+            discount: parseFloat(document.getElementById('discount').value) || 0,
+            paymentMethod: document.getElementById('paymentMethod').value
+        };
+
+        document.getElementById('invoiceInfo').innerHTML =
+            `<p class="fw-bold">${data.invoiceNumber}</p><p class="fs-4 text-success">${data.total.toFixed(2)} ج.م</p>`;
+        document.getElementById('printInvoiceBtn').href = `/Sales/Print/${data.id}`;
+
+        // إظهار زرار الواتساب فقط لو في رقم تليفون
+        const waBtn = document.getElementById('whatsappBtn');
+        waBtn.style.display = currentSaleData.customerPhone ? '' : 'none';
+
+        new bootstrap.Modal(document.getElementById('successModal')).show();
+    }
+}
+
+function sendWhatsApp() {
+    if (!currentSaleData.customerPhone) return;
+    const phone = currentSaleData.customerPhone.replace(/[^0-9]/g, '');
+    // تحويل الرقم المصري لصيغة دولية
+    const intlPhone = phone.startsWith('0') ? '2' + phone : phone.startsWith('2') ? phone : '2' + phone;
+
+    let msg = `🛒 *سوبر ماركت - فاتورة مشترياتك*\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `📋 رقم الفاتورة: *${currentSaleData.invoiceNumber}*\n`;
+    msg += `👤 العميل: ${currentSaleData.customerName}\n`;
+    msg += `💳 طريقة الدفع: ${currentSaleData.paymentMethod}\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `*المشتريات:*\n`;
+    currentSaleData.items.forEach(item => {
+        msg += `• ${item.name} × ${item.qty} = ${item.total.toFixed(2)} ج.م\n`;
+    });
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    if (currentSaleData.discount > 0) {
+        msg += `🎁 خصم: ${currentSaleData.discount.toFixed(2)} ج.م\n`;
+    }
+    msg += `💰 *الإجمالي: ${currentSaleData.total.toFixed(2)} ج.م*\n`;
+    msg += `━━━━━━━━━━━━━━━━\n`;
+    msg += `🙏 شكراً لتسوقكم معنا!`;
+
+    const url = `https://wa.me/${intlPhone}?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
+}
+
+function newSale() {
+    clearCart();
+    document.getElementById('discount').value = 0;
+    currentSaleData = {};
+    bootstrap.Modal.getInstance(document.getElementById('successModal')).hide();
+}
+
+document.getElementById('searchProduct').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.product-card-wrapper').forEach(el => {
+        const match = el.dataset.name.includes(q) || el.dataset.barcode.includes(q);
+        el.style.display = match ? '' : 'none';
+    });
+});
+</script>
+}
+
+

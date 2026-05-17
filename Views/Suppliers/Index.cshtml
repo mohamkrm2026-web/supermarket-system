@@ -1,0 +1,77 @@
+@model List<SuperMarket.Models.Supplier>
+@{
+    ViewData["Title"] = "الموردين";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="mb-0">الموردين</h5>
+    <div class="d-flex gap-2">
+        <a href="/Suppliers/Orders" class="btn btn-outline-primary btn-sm">📋 أوامر الشراء</a>
+        <a href="/Suppliers/Create" class="btn btn-success btn-sm">+ إضافة مورد</a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body p-2">
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="search" value="@ViewBag.Search" class="form-control form-control-sm" placeholder="بحث بالاسم أو الهاتف...">
+            <button class="btn btn-outline-secondary btn-sm px-3">بحث</button>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>اسم المورد</th>
+                    <th>الهاتف</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>الرقم الضريبي</th>
+                    <th>الحالة</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td><a href="/Suppliers/Details/@s.Id" class="fw-bold text-decoration-none">@s.Name</a></td>
+                        <td>@s.Phone</td>
+                        <td>@s.Email</td>
+                        <td>@s.TaxNumber</td>
+                        <td>
+                            @if (s.IsActive)
+                            {
+                                <span class="badge bg-success">نشط</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">غير نشط</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a href="/Suppliers/NewOrder/@s.Id" class="btn btn-sm btn-outline-primary">+ أمر شراء</a>
+                            <a href="/Suppliers/Edit/@s.Id" class="btn btn-sm btn-outline-warning">تعديل</a>
+                            <form method="post" action="/Suppliers/Delete/@s.Id" class="d-inline"
+                                  onsubmit="return confirm('حذف هذا المورد؟')">
+                                <button class="btn btn-sm btn-outline-danger">حذف</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center text-muted py-4">لا يوجد موردين</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

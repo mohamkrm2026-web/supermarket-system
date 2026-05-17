@@ -1,0 +1,49 @@
+@model SuperMarket.Models.AppUser
+@{
+    ViewData["Title"] = "تعديل مستخدم";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Users" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">تعديل: @Model.FullName</h5>
+</div>
+
+<div class="card" style="max-width:520px">
+    <div class="card-body">
+        <form method="post" action="/Users/EditSave">
+            <input type="hidden" name="id" value="@Model.Id">
+            <div class="mb-3">
+                <label class="form-label">الاسم الكامل <span class="text-danger">*</span></label>
+                <input type="text" name="fullName" class="form-control" value="@Model.FullName" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">اسم المستخدم <span class="text-danger">*</span></label>
+                <input type="text" name="username" class="form-control" value="@Model.Username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">كلمة المرور الجديدة <span class="text-muted small">(اتركها فارغة للإبقاء على الحالية)</span></label>
+                <input type="password" name="newPassword" class="form-control" minlength="6">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">الدور <span class="text-danger">*</span></label>
+                <select name="role" class="form-select" required>
+                    <option value="Admin" @(Model.Role=="Admin"?"selected":"")>👑 Admin — كل الصلاحيات</option>
+                    <option value="كاشير" @(Model.Role=="كاشير"?"selected":"")>🖥️ كاشير — الكاشير والمبيعات والعملاء</option>
+                    <option value="مدير مخزن" @(Model.Role=="مدير مخزن"?"selected":"")>📦 مدير مخزن — المنتجات والموردين</option>
+                    <option value="مشاهدة فقط" @(Model.Role=="مشاهدة فقط"?"selected":"")>👁️ مشاهدة فقط — بدون تعديل</option>
+                </select>
+            </div>
+            <div class="mb-4 form-check">
+                <input type="checkbox" name="isActive" value="true" class="form-check-input" id="isActive" @(Model.IsActive?"checked":"")>
+                <label class="form-check-label" for="isActive">نشط</label>
+            </div>
+            <button type="submit" class="btn btn-success px-4">حفظ التعديلات</button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "المبيعات";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <strong>سجل المبيعات</strong>
+        <a href="/Sales/Cashier" class="btn btn-success btn-sm">🖥️ فتح الكاشير</a>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0 small">
+            <thead class="table-light">
+                <tr><th>رقم الفاتورة</th><th>العميل</th><th>الإجمالي</th><th>طريقة الدفع</th><th>التاريخ</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var s in Model)
+                {
+                    <tr>
+                        <td><strong>@s.InvoiceNumber</strong></td>
+                        <td>@(s.Customer?.Name ?? "عميل عام")</td>
+                        <td class="text-success fw-bold">@s.Total.ToString("N2")</td>
+                        <td><span class="badge bg-secondary">@s.PaymentMethod</span></td>
+                        <td class="text-muted">@s.SaleDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td><a href="/Sales/Details/@s.Id" class="btn btn-sm btn-outline-secondary">عرض</a></td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center py-4 text-muted">لا توجد مبيعات</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+

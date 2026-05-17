@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "تعديل منتج";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var p = ViewBag.Product;
+}
+
+<div class="card" style="max-width:600px;margin:auto">
+    <div class="card-header"><h5 class="mb-0">تعديل بيانات المنتج</h5></div>
+    <div class="card-body">
+        <form method="post" action="/Products/EditSave">
+            <input type="hidden" name="Id" value="@p.Id">
+            <div class="mb-3">
+                <label class="form-label fw-semibold">اسم المنتج</label>
+                <input type="text" name="Name" value="@p.Name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">الباركود</label>
+                <input type="text" name="Barcode" value="@p.Barcode" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">التصنيف</label>
+                <select name="Category" class="form-select">
+                    @foreach (var cat in new[]{"بقالة","مشروبات","عناية","خضروات","ألبان","أخرى"})
+                    {
+                        <option value="@cat" @(p.Category == cat ? "selected" : "")>@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col">
+                    <label class="form-label fw-semibold">سعر البيع</label>
+                    <input type="number" name="Price" value="@p.Price" class="form-control" step="0.01" min="0">
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">سعر التكلفة</label>
+                    <input type="number" name="CostPrice" value="@p.CostPrice" class="form-control" step="0.01" min="0">
+                </div>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col">
+                    <label class="form-label fw-semibold">الكمية في المخزون</label>
+                    <input type="number" name="Stock" value="@p.Stock" class="form-control" min="0">
+                </div>
+                <div class="col">
+                    <label class="form-label fw-semibold">الحد الأدنى</label>
+                    <input type="number" name="MinStock" value="@p.MinStock" class="form-control" min="0">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">الوحدة</label>
+                <select name="Unit" class="form-select">
+                    @foreach (var u in new[]{"قطعة","كيس","زجاجة","علبة","كجم","لتر"})
+                    {
+                        <option value="@u" @(p.Unit == u ? "selected" : "")>@u</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="isActive" @(p.IsActive ? "checked" : "")>
+                <label class="form-check-label" for="isActive">منتج نشط</label>
+            </div>
+            <div class="d-flex gap-2 justify-content-end">
+                <a href="/Products" class="btn btn-outline-secondary">إلغاء</a>
+                <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+

@@ -1,0 +1,138 @@
+@{
+    ViewData["Title"] = "التقارير";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h5 class="mb-0">📊 التقارير</h5>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #1a6e3c">
+            <div class="stat-label">إيراد اليوم</div>
+            <div class="stat-value text-success">@ViewBag.TodayRevenue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #0d6efd">
+            <div class="stat-label">إيراد هذا الشهر</div>
+            <div class="stat-value text-primary">@ViewBag.MonthRevenue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #fd7e14">
+            <div class="stat-label">إيراد الشهر السابق</div>
+            <div class="stat-value text-warning">@ViewBag.LastMonthRevenue.ToString("N0")</div>
+            <div class="stat-sub">ج.م</div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="stat-card" style="border-right:4px solid #6f42c1">
+            <div class="stat-label">إجمالي الفواتير</div>
+            <div class="stat-value">@ViewBag.TotalSales</div>
+            <div class="stat-sub">فاتورة</div>
+        </div>
+    </div>
+</div>
+
+<!-- روابط التقارير -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <a href="/Reports/Sales" class="text-decoration-none">
+            <div class="card text-center p-3 h-100" style="border-top:4px solid #1a6e3c;transition:.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:2.5rem">📊</div>
+                <div class="fw-bold mt-2">تقارير المبيعات</div>
+                <div class="small text-muted">يومي / أسبوعي / شهري</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="/Reports/Inventory" class="text-decoration-none">
+            <div class="card text-center p-3 h-100" style="border-top:4px solid #fd7e14;transition:.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:2.5rem">📦</div>
+                <div class="fw-bold mt-2">تقارير المخزون</div>
+                <div class="small text-muted">المنتجات والمخزون</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="/Reports/Profits" class="text-decoration-none">
+            <div class="card text-center p-3 h-100" style="border-top:4px solid #198754;transition:.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:2.5rem">💰</div>
+                <div class="fw-bold mt-2">تقارير الأرباح</div>
+                <div class="small text-muted">الهامش والأرباح</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="/Reports/Customers" class="text-decoration-none">
+            <div class="card text-center p-3 h-100" style="border-top:4px solid #0dcaf0;transition:.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:2.5rem">👥</div>
+                <div class="fw-bold mt-2">تقارير العملاء</div>
+                <div class="small text-muted">الولاء والأكثر شراءً</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3 col-6">
+        <a href="/Reports/Purchases" class="text-decoration-none">
+            <div class="card text-center p-3 h-100" style="border-top:4px solid #6f42c1;transition:.2s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                <div style="font-size:2.5rem">🏷️</div>
+                <div class="fw-bold mt-2">تقارير المشتريات</div>
+                <div class="small text-muted">الموردين والفواتير</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><strong>🏆 أكثر المنتجات مبيعاً</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>#</th><th>المنتج</th><th>الكمية</th><th>الإيراد</th></tr></thead>
+                    <tbody>
+                        @{ int rank = 1; }
+                        @foreach (var p in (dynamic)ViewBag.TopProducts)
+                        {
+                            <tr>
+                                <td><span class="badge bg-warning text-dark">@rank</span></td>
+                                <td>@p.Name</td><td>@p.Qty</td>
+                                <td class="text-success fw-bold">@p.Revenue.ToString("N0")</td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header"><strong>⚠️ منتجات قاربت على الانتهاء</strong></div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0 small">
+                    <thead class="table-light"><tr><th>المنتج</th><th>المخزون</th><th>الحد الأدنى</th></tr></thead>
+                    <tbody>
+                        @foreach (var p in (dynamic)ViewBag.LowStock)
+                        {
+                            <tr class="table-warning">
+                                <td>@p.Name</td>
+                                <td><span class="badge bg-danger">@p.Stock</span></td>
+                                <td>@p.MinStock</td>
+                            </tr>
+                        }
+                        @if (((System.Collections.IList)ViewBag.LowStock).Count == 0)
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-3">لا توجد منتجات منخفضة المخزون ✅</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

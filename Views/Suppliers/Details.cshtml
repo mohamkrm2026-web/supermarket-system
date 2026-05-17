@@ -1,0 +1,105 @@
+@{
+    ViewData["Title"] = "بيانات المورد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var s = (SuperMarket.Models.Supplier)ViewBag.Supplier;
+    var orders = (List<SuperMarket.Models.PurchaseOrder>)ViewBag.Orders;
+}
+
+<div class="d-flex align-items-center gap-2 mb-3">
+    <a href="/Suppliers" class="btn btn-sm btn-outline-secondary">→ رجوع</a>
+    <h5 class="mb-0">@s.Name</h5>
+</div>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>بيانات المورد</strong></div>
+            <div class="card-body">
+                <table class="table table-sm mb-0">
+                    <tr><td class="text-muted">الهاتف</td><td>@(s.Phone ?? "—")</td></tr>
+                    <tr><td class="text-muted">البريد</td><td>@(s.Email ?? "—")</td></tr>
+                    <tr><td class="text-muted">العنوان</td><td>@(s.Address ?? "—")</td></tr>
+                    <tr><td class="text-muted">الرقم الضريبي</td><td>@(s.TaxNumber ?? "—")</td></tr>
+                    <tr><td class="text-muted">الحالة</td><td>@(s.IsActive ? "نشط ✅" : "غير نشط")</td></tr>
+                    <tr><td class="text-muted">تاريخ الإضافة</td><td>@s.CreatedAt.ToString("yyyy-MM-dd")</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header"><strong>إحصائيات</strong></div>
+            <div class="card-body">
+                <div class="row g-2 text-center">
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-primary">@orders.Count</div>
+                            <div class="small text-muted">إجمالي الطلبات</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-success">@orders.Where(o => o.Status == "مستلم").Sum(o => o.Total).ToString("N0")</div>
+                            <div class="small text-muted">إجمالي المشتريات ج.م</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-warning">@orders.Count(o => o.Status == "معلق")</div>
+                            <div class="small text-muted">طلبات معلقة</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-light rounded">
+                            <div class="fs-4 fw-bold text-success">@orders.Count(o => o.Status == "مستلم")</div>
+                            <div class="small text-muted">طلبات مستلمة</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <strong>أوامر الشراء</strong>
+    <a href="/Suppliers/NewOrder/@s.Id" class="btn btn-success btn-sm">+ أمر شراء جديد</a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 small">
+            <thead class="table-light">
+                <tr><th>رقم الأمر</th><th>التاريخ</th><th>الإجمالي</th><th>الحالة</th><th></th></tr>
+            </thead>
+            <tbody>
+                @foreach (var o in orders)
+                {
+                    <tr>
+                        <td><a href="/Suppliers/OrderDetails/@o.Id">@o.OrderNumber</a></td>
+                        <td>@o.OrderDate.ToString("yyyy-MM-dd")</td>
+                        <td class="fw-bold">@o.Total.ToString("N0") ج.م</td>
+                        <td>
+                            @if (o.Status == "مستلم")
+                            { <span class="badge bg-success">@o.Status</span> }
+                            else if (o.Status == "معلق")
+                            { <span class="badge bg-warning text-dark">@o.Status</span> }
+                            else
+                            { <span class="badge bg-secondary">@o.Status</span> }
+                        </td>
+                        <td><a href="/Suppliers/OrderDetails/@o.Id" class="btn btn-sm btn-outline-secondary">تفاصيل</a></td>
+                    </tr>
+                }
+                @if (!orders.Any())
+                {
+                    <tr><td colspan="5" class="text-center text-muted py-3">لا توجد طلبات</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
